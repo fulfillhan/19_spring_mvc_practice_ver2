@@ -1,6 +1,7 @@
 package com.application.practiceVer2.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.application.practiceVer2.dao.BoardDAO;
 import com.application.practiceVer2.dto.BoardDTO;
 import com.application.practiceVer2.service.BoardService;
 
@@ -21,11 +21,16 @@ public class BoardController {
      @Autowired
      private BoardService boardService;
      
+  // Error resolving template [board/createBoard], 
+ 	//template might not exist or might not be accessible by any of the configured Template Resolvers] with root cause
+     
      @GetMapping("/createBoard")
      public String createBoard() {
     	 return "board/createBoard";
      }
      
+     
+
      @PostMapping("/createBoard")
      @ResponseBody
      public String createBoard(@ModelAttribute BoardDTO boardDTO) {
@@ -75,12 +80,12 @@ public class BoardController {
     	 if(boardService.getAuthorized(boardDTO)) {
     		 //인증
     		 if(menu.equals("update")) {
-    			 jsScript = "<select>";
-    			 jsScript += "location.href='/board/updateBoard="+boardDTO.getBoardId()+"';";
+    			 jsScript = "<script>";
+    			 jsScript += "location.href='/board/updateBoard?boardId="+boardDTO.getBoardId()+"';";
     			 jsScript += "</script>";
     		 }else if (menu.equals("delete")) {
-    			 jsScript = "<select>";
-    			 jsScript += "location.href='/board/deleteBoard="+boardDTO.getBoardId()+"';";
+    			 jsScript = "<script>";
+    			 jsScript += "location.href='/board/deleteBoard?boardId="+boardDTO.getBoardId()+"';";
     			 jsScript += "</script>";
 			}
     	 }
@@ -97,16 +102,17 @@ public class BoardController {
 			return jsScript;
     	
      }
-     
+
      @GetMapping("/updateBoard")
-     public String updateBoard(Model model, @RequestParam("boardId") long BoardId) {
+     public String updateBoard(Model model, @RequestParam("boardId") long boardId) {
     	
     //boardService.getBoardDetail(BoardId);
-    	 model.addAttribute("boardDTO", boardService.getBoardDetail(BoardId));
+    	 model.addAttribute("boardDTO", boardService.getBoardDetail(boardId));
     	 return "board/updateBoard";
      }
      
      @PostMapping("/updateBoard")
+     @ResponseBody
      public String updateBoard(@ModelAttribute BoardDTO boardDTO) {
     	 
     	 boardService.updateBoard(boardDTO);
@@ -126,11 +132,25 @@ public class BoardController {
     	 //model.addAttribute(menu, menu)
     	 return "board/deleteBoard";
      }
-     @PostMapping("/deleteBoard")
-     public String deleteBoard(@RequestParam long boardId) {
-    	 // 여기서부터 업데이트
-    	 return"";
-     }
+
+     //오류 발생: Name for argument of type [long] not specified, and parameter name information not available via reflection. 
+     //Ensure that the compiler uses the '-parameters' flag.
+     //long 타입의 이름이 구체화 되지 않았다. 
+     //해결: @RequestParam long boardId -> @RequestParam("boardId") long boardId
+     
+		@PostMapping("/deleteBoard")
+		@ResponseBody
+		public String deleteBoard(@RequestParam("boardId") long boardId) {
+			boardService.deleteBoard(boardId);
+
+			String jsScript = """
+					<script>
+					 alert('삭제되었습니다..');
+					 location.href='/board/boardList';
+					</script>
+								""";
+			return jsScript;
+		}
      
      
    

@@ -2,6 +2,7 @@ package com.application.practiceVer2.service;
 
 import java.util.List;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -43,7 +44,7 @@ public class BoardServiceImple implements BoardService {
 		boolean isCheck= false;
 		
 		// 패스워드만 가지고와서 비교하기
-		String encodedPasswd= boardDAO.getEncodedPasswd(boardDTO.getPasswd());
+		String encodedPasswd= boardDAO.getEncodedPasswd(boardDTO.getBoardId());
 		//passwordEncoder.matches(boardDTO.getPasswd(), encodedPasswd);
 		
 		if(passwordEncoder.matches(boardDTO.getPasswd(), encodedPasswd)) {
@@ -56,6 +57,11 @@ public class BoardServiceImple implements BoardService {
 	public void updateBoard(BoardDTO boardDTO) {
 		boardDAO.updateBoard(boardDTO);
 		
+	}
+
+	@Override
+	public void deleteBoard(long boardId) {
+		boardDAO.deleteBoard(boardId);
 	}
 
 }
